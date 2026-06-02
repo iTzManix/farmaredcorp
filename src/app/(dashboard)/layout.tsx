@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
+import { StatusLights } from '../../components/ui/StatusLights'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -135,6 +136,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             )}
             
+            {/* STATUS LIGHTS HERE */}
+            <StatusLights />
+
             <div className="flex items-center space-x-4 text-slate-500">
               <button className="relative hover:text-slate-900 transition-colors">
                 <Bell className="w-5 h-5" />
