@@ -14,10 +14,11 @@ import { AuthUser } from '../../../../../types'
  * Respuesta útil para: comparar desempeño entre sucursales (barras, mapa de calor).
  * Incluye ticket_promedio para análisis de calidad de venta.
  */
-export const GET = withAuth(async (request: NextRequest, _user: AuthUser) => {
+export const GET = withAuth(async (request: NextRequest, user: AuthUser) => {
   try {
     const url = new URL(request.url)
-    const cp  = url.searchParams.get('codigo_pais')
+    const cpParam = url.searchParams.get('codigo_pais')
+    const cp = user.rol === 'superadmin' ? cpParam : user.codigo_pais
 
     const data = await getVentasPorSucursal(
       cp && ['PE', 'CL'].includes(cp) ? cp : undefined
@@ -27,4 +28,4 @@ export const GET = withAuth(async (request: NextRequest, _user: AuthUser) => {
   } catch (err) {
     return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Error' }, { status: 500 })
   }
-}, ['superadmin'])
+})

@@ -14,10 +14,11 @@ import { AuthUser } from '../../../../../types'
  *
  * Respuesta útil para: ranking de medicamentos más vendidos (barras horizontales).
  */
-export const GET = withAuth(async (request: NextRequest, _user: AuthUser) => {
+export const GET = withAuth(async (request: NextRequest, user: AuthUser) => {
   try {
     const url   = new URL(request.url)
-    const cp    = url.searchParams.get('codigo_pais')
+    const cpParam = url.searchParams.get('codigo_pais')
+    const cp = user.rol === 'superadmin' ? cpParam : user.codigo_pais
     const topN  = Math.min(50, Math.max(1, parseInt(url.searchParams.get('limit') ?? '10')))
 
     const data = await getTopMedicamentos(
@@ -29,4 +30,4 @@ export const GET = withAuth(async (request: NextRequest, _user: AuthUser) => {
   } catch (err) {
     return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Error' }, { status: 500 })
   }
-}, ['superadmin'])
+})

@@ -14,15 +14,17 @@ import { AuthUser } from '../../../../../types'
  * Retorna ingresos totales en USD por país para el período indicado.
  * Útil para tarjetas KPI de "Ingresos del mes" comparando PE vs CL.
  */
-export const GET = withAuth(async (request: NextRequest, _user: AuthUser) => {
+export const GET = withAuth(async (request: NextRequest, user: AuthUser) => {
   try {
     const url  = new URL(request.url)
+    const cpParam = url.searchParams.get('codigo_pais')
+    const cp = user.rol === 'superadmin' ? cpParam : user.codigo_pais
     const dias = Math.min(365, Math.max(1, parseInt(url.searchParams.get('dias') ?? '30')))
 
-    const data = await getIngresosPorPeriodo(dias)
+    const data = await getIngresosPorPeriodo(dias, cp && ['PE', 'CL'].includes(cp) ? cp : undefined)
 
     return NextResponse.json({ success: true, data, meta: { dias } })
   } catch (err) {
     return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Error' }, { status: 500 })
   }
-}, ['superadmin'])
+})

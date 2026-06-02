@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth, fetchWithAuth } from '../../../contexts/AuthContext'
 import { Card, CardContent } from '../../../components/ui/Card'
 import { DollarSign, Users, AlertTriangle, Activity, ShoppingCart, Info } from 'lucide-react'
@@ -13,6 +13,7 @@ function formatUSD(value: number) {
 
 export default function SuperadminDashboard() {
   const { user } = useAuth()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const cpParam = searchParams.get('cp') || 'ALL'
 
@@ -81,17 +82,41 @@ export default function SuperadminDashboard() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-semibold bg-primary text-white px-2.5 py-0.5 rounded-full">
-            Superadmin
-          </span>
-          <span className="text-xs text-slate-400">Vista Global Consolidada</span>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-semibold bg-primary text-white px-2.5 py-0.5 rounded-full">
+              Superadmin
+            </span>
+            <span className="text-xs text-slate-400">Vista Global Consolidada</span>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard Overview</h1>
+          <p className="text-slate-500 mt-1 text-sm">
+            {isGlobal ? 'Consolidado Perú + Chile' : `Filtrado por: ${cpParam === 'PE' ? 'Perú' : 'Chile'}`}
+          </p>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard Overview</h1>
-        <p className="text-slate-500 mt-1 text-sm">
-          {isGlobal ? 'Consolidado Perú + Chile' : `Filtrado por: ${cpParam}`}
-        </p>
+
+        {/* Filtro de país */}
+        <div className="flex bg-slate-100 p-1 rounded-lg self-start">
+          <button 
+            onClick={() => router.push('/dashboard?cp=ALL')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${isGlobal ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}
+          >
+            Global
+          </button>
+          <button 
+            onClick={() => router.push('/dashboard?cp=PE')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${cpParam === 'PE' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}
+          >
+            Perú
+          </button>
+          <button 
+            onClick={() => router.push('/dashboard?cp=CL')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${cpParam === 'CL' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}
+          >
+            Chile
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}

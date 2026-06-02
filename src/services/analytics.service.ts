@@ -220,8 +220,12 @@ export interface IngresoResumen {
  *
  * @param dias - número de días (default 30)
  */
-export async function getIngresosPorPeriodo(dias = 30): Promise<IngresoResumen[]> {
+export async function getIngresosPorPeriodo(dias = 30, codigo_pais?: string): Promise<IngresoResumen[]> {
   const db = await getDbBolivia()
+
+  const whereCP = codigo_pais && ['PE', 'CL'].includes(codigo_pais)
+    ? `AND codigo_pais = '${codigo_pais}'`
+    : `AND codigo_pais IN ('PE', 'CL')`
 
   const res = await db.request()
     .input('dias', sql.Int, dias)
@@ -234,7 +238,7 @@ export async function getIngresosPorPeriodo(dias = 30): Promise<IngresoResumen[]
         @dias                           AS periodo_dias
       FROM venta
       WHERE fecha >= DATEADD(day, -@dias, GETDATE())
-        AND codigo_pais IN ('PE', 'CL')
+        ${whereCP}
       GROUP BY codigo_pais
     `)
 
