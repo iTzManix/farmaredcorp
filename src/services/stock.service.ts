@@ -52,9 +52,13 @@ export async function listarStock(
     const res = await db.request()
       .input('cp', sql.Char(2), codigo_pais).input('offset', sql.Int, offset).input('limit', sql.Int, limit)
       .query<Stock>(`
-        SELECT id_stock,id_medicamento,id_sucursal,cantidad,precio_usd,fecha_actualizacion,codigo_pais
-        FROM stock WHERE codigo_pais=@cp
-        ORDER BY id_sucursal, id_medicamento
+        SELECT s.id_stock, s.id_medicamento, s.id_sucursal, s.cantidad, s.precio_usd, s.fecha_actualizacion, s.codigo_pais,
+               m.nombre AS medicamento_nombre, suc.nombre AS sucursal_nombre
+        FROM stock s
+        LEFT JOIN medicamento m ON s.id_medicamento = m.id_medicamento
+        LEFT JOIN sucursal suc ON s.id_sucursal = suc.id_sucursal
+        WHERE s.codigo_pais=@cp
+        ORDER BY s.id_sucursal, s.id_medicamento
         OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
       `)
     return buildPaginatedResult(res.recordset, total, { page, limit, offset })
@@ -65,8 +69,13 @@ export async function listarStock(
     )
     const total = parseInt(countRes.rows[0]?.total ?? '0')
     const res = await db.query<Stock>(
-      `SELECT id_stock,id_medicamento,id_sucursal,cantidad,precio_usd,fecha_actualizacion,codigo_pais
-       FROM stock WHERE codigo_pais=$1 ORDER BY id_sucursal,id_medicamento LIMIT $2 OFFSET $3`,
+      `SELECT s.id_stock, s.id_medicamento, s.id_sucursal, s.cantidad, s.precio_usd, s.fecha_actualizacion, s.codigo_pais,
+              m.nombre AS medicamento_nombre, suc.nombre AS sucursal_nombre
+       FROM stock s
+       LEFT JOIN medicamento m ON s.id_medicamento = m.id_medicamento
+       LEFT JOIN sucursal suc ON s.id_sucursal = suc.id_sucursal
+       WHERE s.codigo_pais=$1 
+       ORDER BY s.id_sucursal, s.id_medicamento LIMIT $2 OFFSET $3`,
       [codigo_pais, limit, offset]
     )
     return buildPaginatedResult(res.rows, total, { page, limit, offset })

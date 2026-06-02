@@ -170,9 +170,12 @@ export async function listarVentas(
     const res = await db.request()
       .input('cp', sql.Char(2), codigo_pais).input('offset', sql.Int, offset).input('limit', sql.Int, limit)
       .query<Venta>(`
-        SELECT id_venta,id_cliente,id_empleado,id_sucursal,fecha,monto_total_usd,codigo_pais
-        FROM venta WHERE codigo_pais=@cp
-        ORDER BY fecha DESC
+        SELECT v.id_venta, v.id_cliente, v.id_empleado, v.id_sucursal, v.fecha, v.monto_total_usd, v.codigo_pais,
+               c.nombre AS cliente_nombre
+        FROM venta v
+        LEFT JOIN cliente c ON v.id_cliente = c.id_cliente
+        WHERE v.codigo_pais=@cp
+        ORDER BY v.fecha DESC
         OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
       `)
     return buildPaginatedResult(res.recordset, total, { page, limit, offset })
@@ -183,8 +186,11 @@ export async function listarVentas(
     )
     const total = parseInt(countRes.rows[0]?.total ?? '0')
     const res = await db.query<Venta>(
-      `SELECT id_venta,id_cliente,id_empleado,id_sucursal,fecha,monto_total_usd,codigo_pais
-       FROM venta WHERE codigo_pais=$1 ORDER BY fecha DESC LIMIT $2 OFFSET $3`,
+      `SELECT v.id_venta, v.id_cliente, v.id_empleado, v.id_sucursal, v.fecha, v.monto_total_usd, v.codigo_pais,
+              c.nombre AS cliente_nombre
+       FROM venta v
+       LEFT JOIN cliente c ON v.id_cliente = c.id_cliente
+       WHERE v.codigo_pais=$1 ORDER BY v.fecha DESC LIMIT $2 OFFSET $3`,
       [codigo_pais, limit, offset]
     )
     return buildPaginatedResult(res.rows, total, { page, limit, offset })

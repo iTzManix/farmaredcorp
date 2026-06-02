@@ -110,6 +110,8 @@ export interface Stock {
   precio_usd: number
   fecha_actualizacion: Date
   codigo_pais: string
+  medicamento_nombre?: string
+  sucursal_nombre?: string
 }
 
 export interface StockInput {
@@ -132,6 +134,7 @@ export interface Venta {
   fecha: Date
   monto_total_usd: number
   codigo_pais: string
+  cliente_nombre?: string
 }
 
 export interface DetalleVentaInput {
